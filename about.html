@@ -1,0 +1,270 @@
+<html>
+    <head>
+        <title>VPN Speed Test</title>
+        <meta name="description" content="Speed testing 20+ popular VPN services 24 times per day from 8 locations around the world.">
+        <meta name="ROBOTS" content="INDEX, FOLLOW">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/jquery.js"></script>
+        <script src="/js/raphael-2.1.4.min.js"></script>
+        <script src="/js/justgage.js"></script>
+    	<script src="/js/moment.min.js"></script>
+    	<script src="/js/Chart.bundle.min.js"></script>
+    	<script src="/js/utils.js"></script>
+        <script src="/js/countUp.js"></script>
+        <link rel="stylesheet" href="/css/style.css">
+
+    </head>
+    <body>
+        
+        <div class="header-cont">
+            <span class="header-last-result">
+                <table cellpadding="0" cellspacing="5">
+                    <tr>
+                        <td>
+                            <div class="latest-guage-speed" id="latest-gauge-https"></div>
+                            <div class="latest-guage-speed" id="latest-gauge-bittorrent"></div>
+                            <div class="latest-guage-speed-small" id="latest-gauge-vpn-connect"></div>
+                            <div class="latest-guage-speed-small" id="latest-gauge-dns-lookup"></div>
+                        </td>
+                        <td>
+                            <span id="latest-location"></span>
+                        </td>
+                        <td>
+                            <span id="latest-vpn-service"></span>
+                        </td>
+                        <td>
+                            Start: <span id="latest-timestamp-iso"></span><br>
+                            End: <span id="latest-timestamp-end-iso"></span>
+                        </td>
+                        <td>
+                            <a class="speedtest" id="log-results" target="_blank">results log</a><br>
+                            <a class="speedtest" id="log-speedtest" target="_blank">speedtest log</a><br>
+                            <a class="speedtest" id="log-openvpn" target="_blank">openvpn log</a><br>
+                            <a class="speedtest" id="log-bittorrent" target="_blank">bittorrent log</a>
+                        </td>
+                        <td>
+                            test result:<br><span id="latest-test-result"></span>
+                        </td>
+                    </tr>
+                </table>
+            </span>
+            <span class="header-menu">
+                <div class="dropdown">
+                  <button class="dropbtn">Menu</button>
+                  <div class="dropdown-content">
+                    <a href="index.html">Home</a>  
+                    <a href="about.html">Why? How? What?</a>
+                    <a href="verify.html">Verify Our Tests</a>
+                    <a href="https://github.com/vpnspeedtest/speedtests-scripts" target="_blank">View the Source Code</a>
+                  </div>
+                </div>
+            </span>
+        </div>
+        <br>
+        <div class="about">
+            
+            <div class="Danger Importance-Less">NOTE: Since we've added more VPN providers and now run even more tests per day - we've been detecting network issues on the Vultr servers which freezes the download and corrupts the speedtest result. We're manually removing data points for tests that were corrupted (email us if you see one) and we've updated the script to do a better job of detecting them too.</div>
+            <br>
+            <h2>How?</h2>
+            
+            <p>We test 20+ popular VPN services 24 times per day from 8 locations around the world (that's almost 500 tests per day!) - trying to hit the maximum bandwidth that the VPN server is capable of.</p>
+            
+            <p>The speedtest location, VPN provider and the VPN server are all chosen randomly for fair results. All speedtests are performed using OpenVPN over UDP (with the providers default settings) from Vultr VPS servers geographically close to the VPN servers.</p>
+                         
+            <p>To find the maximum speed of a each VPN server we need to test from a location geographically near the VPN server. For example if you wanted to find the maximum speed of a VPN server in Amsterdam, then you would need to test from Amsterdam.
+            
+                This limits any network bottlenecks between the test server and the VPN server. The test servers have gigabit network connections with good peering to Internet exchange points - which is faster than any home internet connection.</p>
+            
+            <h2>What?</h2>
+            
+            <p>To test the download speed we run two tests: a HTTPS download and a bittorrent download, with around 2GB of data downloaded for each VPN speed test. This reflects real-world use and cannot be skewed by compression during transmission.</p>
+
+            <p>A popular torrent with many peers will be able to supply large bandwidths of data no matter  where in the world it is downloaded from. Currently we test with <a href="http://releases.ubuntu.com/16.04.1/ubuntu-16.04.1-desktop-amd64.iso.torrent">Ubuntu 16.04.1 Desktop (64-bit)</a> but we will update this as other versions become more popular.</p>
+
+            <p>The HTTPS test downloads <a href="https://dl.google.com/dl/android/studio/ide-zips/2.2.2.0/android-studio-ide-145.3360264-linux.zip">a 445MB zip file from Google</a> - who have <a href="https://peering.google.com/#/infrastructure" target="blank">a very fast CDN worldwide</a>. Downloading the same .zip test file directly to any of the 8 Vultr test servers is much faster than via any of VPN servers, which shows it's a reliable source to use around the world.</p>
+
+            <p>When testing VPN speeds using data from sites like <a href="http://testmy.net/" target="_blank">testmy.net</a> the test results will be affected by the network speeds between the download server and the VPN server - which will skew the results.</p>
+
+            <p>All our tests are run on Vultr VPS servers. Each Vultr server can download at speeds much faster than most consumer internet connections. Servers cost less than $0.01 an hour and can be created in an instant and then destroyed when they're no longer needed. Plus they offer servers in a range of continents - not just the US and Europe.</p>
+
+            <p>We only do download tests for 2 key reasons:
+                <ul>
+                    <li>We don't want the tests to be mis-diagnosed as a DDoS attack - since we're running tests 24/7. One upload test of 10MB by thousands of people is different to 8 servers constantly flooding networks randomly.</li>
+                    <li>Most internet activity is downstream and we assume that VPN servers with good download speeds will also have good upload speeds.</li>
+                </ul>
+            </p>
+            
+            <h2>Why?</h2>
+        
+            <p>VPN speeds are a grey area (until now).</p>
+
+            <p>Browser based speed tests are a good indicator of your current speed to your current VPN server but they are not an indicator of the <b>maximum speed</b> of a VPN server.
+
+            <p>Even if your speed tests show slow speeds it does not mean that the VPN server you are testing is slow. Many factors will influence your results, such as:
+                <ul>
+                    <li>Current bandwidth of the source you are downloading from.</li>
+                    <li>The network connecting the download source to the VPN server.</li>
+                    <li>The network connecting the VPN server to you.</li>
+                    <li>...and all of the above can change depending on the time you test.</li>
+                </ul>
+            </p>
+        
+            <p>Results will also vary depending on the type of file you download. Is it a test file filled with 1's or 0's which gets highly compressed by the VPN protocol during transmission to you? Or is it already compressed?</p>
+
+            <p><b>We're trying to find the maximum speed of a VPN server at a given time.</b> We do large downloads to try to reach the limit of the VPN server.
+                
+                Since the maximum download speeds are up to 250Mbps, for the test to be accurate a large download is needed for the test to run for a reasonable amount of time. We also found that bigger downloads can reach higher speeds than a smaller download.</p>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <script>
+        
+            var socket = io('http://vpnspeedtest.org');
+            
+            var myColors = [
+            "#ff0000",
+            "#f9c802",
+            "#a9d70b"
+            ];
+        
+            var guage_latest_https = new JustGage({
+                id: "latest-gauge-https",
+                value: 0,
+                min: 0,
+                max: 100,
+                levelColors : myColors,
+                title: "https",
+                label: "Mbps",
+                levelColorsGradient: false,
+                showMinMax: true,
+                showInnerShadow: true,
+                shadowOpacity: 0.7,
+                shadowSize: 1,
+                shadowVerticalOffset: 1
+            });
+            var guage_latest_bittorrent = new JustGage({
+                id: "latest-gauge-bittorrent",
+                value: 0,
+                min: 0,
+                max: 100,
+                levelColors : myColors,
+                title: "bittorrent",
+                label: "Mbps",
+                levelColorsGradient: false,
+                showMinMax: true,
+                showInnerShadow: true,
+                shadowOpacity: 0.7,
+                shadowSize: 1,
+                shadowVerticalOffset: 1
+            });
+            var guage_latest_vpn_connect = new JustGage({
+                id: "latest-gauge-vpn-connect",
+                value: 0,
+                min: 0,
+                max: 10,
+                title: "connect",
+                label: "seconds",
+                levelColorsGradient: false,
+                showMinMax: true,
+                showInnerShadow: true,
+                shadowOpacity: 0.7,
+                shadowSize: 1,
+                shadowVerticalOffset: 1
+            });
+            var guage_latest_dns_lookup = new JustGage({
+                id: "latest-gauge-dns-lookup",
+                value: 0,
+                min: 0,
+                max: 3,
+                title: "DNS",
+                label: "seconds",
+                levelColorsGradient: false,
+                showMinMax: true,
+                showInnerShadow: true,
+                shadowOpacity: 0.7,
+                shadowSize: 1,
+                shadowVerticalOffset: 1
+            });
+            
+            socket.on('newspeedtest', function(data){
+                console.log(data.message);
+                if (typeof data.message == 'undefined' || 'none' == data.message) {
+                    return;
+                }
+            
+                test_result = JSON.parse(data.message);
+            
+                var location_img = test_result["location"].toLowerCase();
+                location_img = location_img.replace(" ", "")
+                document.getElementById('latest-location').innerHTML = "\<img src='/img/" + location_img + ".png' title='" + test_result["location"] + "' height='48' width='48'/>";
+            
+                var vpn_img = test_result["vpn-service"];
+                document.getElementById('latest-vpn-service').innerHTML = "\<img src='/img/" + vpn_img + ".png' title='" + test_result["vpn-service"] + "' height='36' width='36'/>";
+            
+                var date_start = new Date(test_result["timestamp-iso"]);
+                document.getElementById('latest-timestamp-iso').innerHTML = moment(date_start).format("h:mm:ss a");
+            
+                var date_start = new Date(test_result["timestamp-end-iso"]);
+                document.getElementById('latest-timestamp-end-iso').innerHTML = moment(date_start).format("h:mm:ss a");
+
+                $('#log-results').attr('href','/logs/' + test_result["log-results"]);
+                $('#log-speedtest').attr('href','/logs/' + test_result["log-speedtest"]);
+                $('#log-openvpn').attr('href','/logs/' + test_result["log-openvpn"]);
+                $('#log-bittorrent').attr('href','/logs/' + test_result["log-bittorrent"]);
+
+
+                document.getElementById('latest-test-result').innerHTML = test_result['test-result'];
+                if (test_result['test-result'] == 'OK') {
+                    document.getElementById('latest-test-result').className = 'success';
+                }
+                else {
+                    document.getElementById('latest-test-result').className = 'failure';
+                }
+
+                if ('https-download-speed-Mbps' in test_result) {
+                    guage_latest_https.refresh(parseFloat(test_result["https-download-speed-Mbps"]));
+                }
+                else {
+                    guage_latest_https.refresh(0);
+                }
+                if ('p2p-download-speed-Mbps' in test_result) {
+                    guage_latest_bittorrent.refresh(test_result["p2p-download-speed-Mbps"]);
+                }
+                else {
+                    guage_latest_bittorrent.refresh(0);
+                }
+                if ('vpn-connection-time' in test_result) {
+                    guage_latest_vpn_connect.refresh(test_result["vpn-connection-time"]);
+                }
+                else {
+                    guage_latest_vpn_connect.refresh(0);
+                }
+                if ('dns-lookup-time' in test_result) {
+                    guage_latest_vpn_connect.refresh(test_result["dns-lookup-time"]);
+                }
+                else {
+                    guage_latest_vpn_connect.refresh(0);
+                }
+            });
+
+        
+        </script>
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+          ga('create', 'UA-87832605-1', 'auto');
+          ga('send', 'pageview');
+        </script>
+      </body>
+    </html>

@@ -1,0 +1,361 @@
+<html>
+    <head>
+        <title>VPN Speed Test</title>
+        <meta name="description" content="Speed testing 20+ popular VPN services 24 times per day from 8 locations around the world.">
+        <meta name="ROBOTS" content="INDEX, FOLLOW">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/jquery.js"></script>
+        <script src="/js/raphael-2.1.4.min.js"></script>
+        <script src="/js/justgage.js"></script>
+    	<script src="/js/moment.min.js"></script>
+    	<script src="/js/Chart.bundle.min.js"></script>
+    	<script src="/js/utils.js"></script>
+        <script src="/js/countUp.js"></script>
+        <script type="text/javascript" src="/js/run_prettify.js"></script>
+        <link rel="stylesheet" href="/css/style.css" type="text/css" />
+        <link rel="stylesheet" href="/css/desert.css" type="text/css" />
+
+    </head>
+    <body>
+        
+        <div class="header-cont">
+            <span class="header-last-result">
+                <table cellpadding="0" cellspacing="5">
+                    <tr>
+                        <td>
+                            <div class="latest-guage-speed" id="latest-gauge-https"></div>
+                            <div class="latest-guage-speed" id="latest-gauge-bittorrent"></div>
+                            <div class="latest-guage-speed-small" id="latest-gauge-vpn-connect"></div>
+                            <div class="latest-guage-speed-small" id="latest-gauge-dns-lookup"></div>
+                        </td>
+                        <td>
+                            <span id="latest-location"></span>
+                        </td>
+                        <td>
+                            <span id="latest-vpn-service"></span>
+                        </td>
+                        <td>
+                            Start: <span id="latest-timestamp-iso"></span><br>
+                            End: <span id="latest-timestamp-end-iso"></span>
+                        </td>
+                        <td>
+                            <a class="speedtest" id="log-results" target="_blank">results log</a><br>
+                            <a class="speedtest" id="log-speedtest" target="_blank">speedtest log</a><br>
+                            <a class="speedtest" id="log-openvpn" target="_blank">openvpn log</a><br>
+                            <a class="speedtest" id="log-bittorrent" target="_blank">bittorrent log</a>
+                        </td>
+                        <td>
+                            test result:<br><span id="latest-test-result"></span>
+                        </td>
+                    </tr>
+                </table>
+            </span>
+            <span class="header-menu">
+                <div class="dropdown">
+                  <button class="dropbtn">Menu</button>
+                  <div class="dropdown-content">
+                    <a href="index.html">Home</a>  
+                    <a href="about.html">Why? How? What?</a>
+                    <a href="verify.html">Verify Our Tests</a>
+                    <a href="https://github.com/vpnspeedtest/speedtests-scripts" target="_blank">View the Source Code</a>
+                  </div>
+                </div>
+            </span>
+        </div>
+        <br>
+        <div class="about">
+            
+            <h2>Verify Our Test Results</h2>
+            
+            <p>These are <b>the first reproducible VPN speed tests</b>. All other tests have been done from the testers location - which nobody else can access to verify the tests. Previous speed tests are therefore only relative to the internet connection from where they were tested. Our tests are run from VPS servers that anyone can rent cheaply for an hour to reproduce our test results or to test their VPN provider.</p>
+            
+            <div class="line"><a href="#jump-1"><span class="read-more">#1</span></a></div>
+            <a id="jump-1"></a>
+            <h3>Create a Vultr Account</h3>
+            <div class="imagebox">
+                <img src="/img/vultr-create-account.png">
+            </div>
+            <p>All our tests are run on Vultr VPS servers. Each Vultr server can download at speeds much faster than most consumer internet connections. Servers cost less than $0.01 an hour and can be created in an instant and then destroyed when they're no longer needed. Plus they offer servers in a range of continents - not just the US and Europe.</p>
+                
+            <div class="line"><a href="#jump-2"><span class="read-more">#2</span></a></div>
+            <a id="jump-2"></a>
+            <h3>Create a Startup Script</h3>
+            
+            <p>The startup script will fetch the vpnspeedtest latest code from GitHub and then setup the environment and tools for the script to run. 
+                You can run the script manually when you first login to the server however we suggest setting it as a startup script so that everything is 
+                already prepared when you first login.</p>
+            <div class="imagebox">
+                <div class="img">
+                    <img src="/img/vultr-startup-init.png" alt="???" width="150" >
+                    <div class="desc">From the Server menu choose 'Startup Scripts'.</div>
+                </div>
+                <div class="img">
+                    <img src="/img/vultr-startup-type.png" alt="???" width="150" >
+                    <div class="desc">Choose a name for the script and type 'Boot'.</div>
+                </div>
+                <div class="img">
+                    <img src="/img/vultr-startup-save.png" alt="???" width="150" >
+                    <div class="desc">Click 'Add Script' to save the startup script.</div>
+                </div>
+            </div>
+
+            
+            <p>Copy the script below and paste it as the startup script. Click 'Add Script'</p>
+            <pre class="prettyprint lang-sh">
+                
+    #!/bin/sh
+
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get -y install unzip
+
+    #get the latest code from git
+    cd /tmp/
+    wget -O vpnspeedtest.zip https://github.com/vpnspeedtest/speedtests-scripts/archive/master.zip
+    unzip -o vpnspeedtest.zip
+    cp -R speedtests-scripts-master/* ~
+
+    #setup working folders
+    cd ~
+    mkdir -p torrents
+    mkdir -p logs
+    mkdir -p vpn_auth
+
+    #setup environment
+    chmod 700 scripts/*
+    ./scripts/vultr-debian-setup.sh
+
+    #update the path to use the new curl we just built from source
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    export PATH
+
+    #show the help text to indicate we're ready to test! 
+    python vpnspeedtest.py --help
+            </pre>
+            
+            <div class="line"><a href="#jump-3"><span class="read-more">#3</span></a></div>
+            <a id="jump-3"></a>
+            <h3>Deploy a Vultr Server</h3>
+            <p>Deploy a new server in the location that you'd like to test from. 
+                The vpnspeedtest script will auto-detect which Vultr location you have chosen, but only the following locations are supported: Los Angeles, New York (NJ), London, Paris, Amsterdam, Frankfurt, Sydney or Tokyo.</p>
+            
+            <p>To test the maximum speed the Vultr server needs to be geographically close to the VPN server.</p> 
+            
+            <div class="imagebox">
+                <div class="img">
+                    <img src="/img/vultr-location.png" alt="???" width="150" >
+                    <div class="desc">Los Angeles, New York (NJ), London, Paris, Amsterdam, Frankfurt, Sydney or Tokyo.</div>
+                </div>
+                <div class="img">
+                    <img src="/img/vultr-os.png" alt="???" width="150" >
+                    <div class="desc">Choose Debian 7 (x64).</div>
+                </div>
+                <div class="img">
+                    <img src="/img/vultr-server.png" alt="???" width="150" >
+                    <div class="desc">The cheapest virtual server will do.</div>
+                </div>
+                <div class="img">
+                    <img src="/img/vultr-script.png" alt="???" width="150" >
+                    <div class="desc">Select your startup script.</div>
+                </div>
+                <div class="img">
+                    <img src="/img/vultr-deploy.png" alt="???" width="150" >
+                    <div class="desc">Deploy.</div>
+                </div>
+            </div>
+
+            <div class="line"><a href="#jump-4"><span class="read-more">#4</span></a></div>
+            <a id="jump-4"></a>
+            <h3>Connect to Your Vultr Server</h3>
+            <p>In your server list, select your server to view the server details. You can connect using the built-in Vultr console but copy and paste does not work.</p>
+            
+            <div class="imagebox" align='center'>
+                <div class="img">
+                    <img src="/img/vultr-server-details.png" alt="???" width="150" >
+                    <div class="desc">View your servers login details.</div>
+                </div>
+                <div class="img">
+                    <img src="/img/linux-terminal.png" alt="???" width="150" >
+                    <div class="desc">Linux users can connect with the shell.</div>
+                </div>
+                <div class="img">
+                    <img src="/img/osx-terminal.png" alt="???" width="150" >
+                    <div class="desc">Mac OS X users can connect with the Terminal app.</div>
+                </div>
+                <div class="img">
+                    <img src="/img/windows-putty.png" alt="???" width="150" >
+                    <div class="desc">Windows users can connect with <a href="http://www.putty.org/" target="_blank">PuTTY.</a></div>
+                </div>
+            </div>
+            
+            <p>Connect with SSH to your server's IP address and login as root: <code>ssh root@&lt;server-IP&gt;</code></p> 
+            <p>Wait for the startup script to finish setting up the server. When it's done you will see the help text for the vpnspeedtest script. 
+                Use the command:<br><br>
+                <code>tail -n 40 -f /tmp/firstboot.log</code>
+                <br><br>
+                and then press <code>Ctrl + C</code> when you see the help text.</p>
+            <div class="imagebox" align='center'>
+                <img src="/img/terminal-ready.png">
+            </div>
+            
+            <div class="line"><a href="#jump-5"><span class="read-more">#5</span></a></div>
+            <a id="jump-5"></a>
+            <h3>Run the VPN speed test on any VPN</h3>
+            
+            <p>To verify any of the VPN services that we test you do not need to download anything else. Run the test with:
+                <pre class="prettyprint lang-sh">
+    
+    python vpnspeedtest.py --vpn=myvpn --auth-username=myvpnusername --auth-password=myvpnpassword
+
+                </pre>
+            <p>To test any other VPN service download the Linux OpenVPN configuration file(s) (and any associated keys and certificates) and place them in the <code>/root/</code> folder. </p>
+            <p> <pre class="prettyprint lang-sh">
+                
+    wget https://myVPN.com/configs/linux_configs.zip
+    unzip linux_configs.zip
+    python vpnspeedtest.py --config=myvpn/someconfigfile.ovpn
+    
+                </pre></p>
+        </div>
+        
+        <script>
+        
+            var socket = io('http://vpnspeedtest.org');
+            
+            var myColors = [
+            "#ff0000",
+            "#f9c802",
+            "#a9d70b"
+            ];
+        
+            var guage_latest_https = new JustGage({
+                id: "latest-gauge-https",
+                value: 0,
+                min: 0,
+                max: 100,
+                levelColors : myColors,
+                title: "https",
+                label: "Mbps",
+                levelColorsGradient: false,
+                showMinMax: true,
+                showInnerShadow: true,
+                shadowOpacity: 0.7,
+                shadowSize: 1,
+                shadowVerticalOffset: 1
+            });
+            var guage_latest_bittorrent = new JustGage({
+                id: "latest-gauge-bittorrent",
+                value: 0,
+                min: 0,
+                max: 100,
+                levelColors : myColors,
+                title: "bittorrent",
+                label: "Mbps",
+                levelColorsGradient: false,
+                showMinMax: true,
+                showInnerShadow: true,
+                shadowOpacity: 0.7,
+                shadowSize: 1,
+                shadowVerticalOffset: 1
+            });
+            var guage_latest_vpn_connect = new JustGage({
+                id: "latest-gauge-vpn-connect",
+                value: 0,
+                min: 0,
+                max: 10,
+                title: "connect",
+                label: "seconds",
+                levelColorsGradient: false,
+                showMinMax: true,
+                showInnerShadow: true,
+                shadowOpacity: 0.7,
+                shadowSize: 1,
+                shadowVerticalOffset: 1
+            });
+            var guage_latest_dns_lookup = new JustGage({
+                id: "latest-gauge-dns-lookup",
+                value: 0,
+                min: 0,
+                max: 3,
+                title: "DNS",
+                label: "seconds",
+                levelColorsGradient: false,
+                showMinMax: true,
+                showInnerShadow: true,
+                shadowOpacity: 0.7,
+                shadowSize: 1,
+                shadowVerticalOffset: 1
+            });
+            
+            socket.on('newspeedtest', function(data){
+                console.log(data.message);
+                if (typeof data.message == 'undefined' || 'none' == data.message) {
+                    return;
+                }
+            
+                test_result = JSON.parse(data.message);
+            
+                var location_img = test_result["location"].toLowerCase();
+                location_img = location_img.replace(" ", "")
+                document.getElementById('latest-location').innerHTML = "\<img src='/img/" + location_img + ".png' title='" + test_result["location"] + "' height='48' width='48'/>";
+            
+                var vpn_img = test_result["vpn-service"];
+                document.getElementById('latest-vpn-service').innerHTML = "\<img src='/img/" + vpn_img + ".png' title='" + test_result["vpn-service"] + "' height='36' width='36'/>";
+            
+                var date_start = new Date(test_result["timestamp-iso"]);
+                document.getElementById('latest-timestamp-iso').innerHTML = moment(date_start).format("h:mm:ss a");
+            
+                var date_start = new Date(test_result["timestamp-end-iso"]);
+                document.getElementById('latest-timestamp-end-iso').innerHTML = moment(date_start).format("h:mm:ss a");
+
+                $('#log-results').attr('href','/logs/' + test_result["log-results"]);
+                $('#log-speedtest').attr('href','/logs/' + test_result["log-speedtest"]);
+                $('#log-openvpn').attr('href','/logs/' + test_result["log-openvpn"]);
+                $('#log-bittorrent').attr('href','/logs/' + test_result["log-bittorrent"]);
+
+
+                document.getElementById('latest-test-result').innerHTML = test_result['test-result'];
+                if (test_result['test-result'] == 'OK') {
+                    document.getElementById('latest-test-result').className = 'success';
+                }
+                else {
+                    document.getElementById('latest-test-result').className = 'failure';
+                }
+
+                if ('https-download-speed-Mbps' in test_result) {
+                    guage_latest_https.refresh(parseFloat(test_result["https-download-speed-Mbps"]));
+                }
+                else {
+                    guage_latest_https.refresh(0);
+                }
+                if ('p2p-download-speed-Mbps' in test_result) {
+                    guage_latest_bittorrent.refresh(test_result["p2p-download-speed-Mbps"]);
+                }
+                else {
+                    guage_latest_bittorrent.refresh(0);
+                }
+                if ('vpn-connection-time' in test_result) {
+                    guage_latest_vpn_connect.refresh(test_result["vpn-connection-time"]);
+                }
+                else {
+                    guage_latest_vpn_connect.refresh(0);
+                }
+                if ('dns-lookup-time' in test_result) {
+                    guage_latest_vpn_connect.refresh(test_result["dns-lookup-time"]);
+                }
+                else {
+                    guage_latest_vpn_connect.refresh(0);
+                }
+            });
+        
+        </script>
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+          ga('create', 'UA-87832605-1', 'auto');
+          ga('send', 'pageview');
+        </script>
+    </body>
+</html>

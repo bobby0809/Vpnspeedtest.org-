@@ -1,0 +1,1158 @@
+<html>
+    <head>
+        <title>VPN Speed Test</title>
+        <meta name="description" content="Speed testing 20+ popular VPN services 24 times per day from 8 locations around the world.">
+        <meta name="ROBOTS" content="INDEX, FOLLOW">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/jquery.js"></script>
+        <script src="/js/raphael-2.1.4.min.js"></script>
+        <script src="/js/justgage.js"></script>
+    	<script src="/js/moment.min.js"></script>
+    	<script src="/js/Chart.bundle.min.js"></script>
+    	<script src="/js/utils.js"></script>
+        <script src="/js/countUp.js"></script>
+        <script src="/js/thatoneprivacysite.js"></script>
+        <link rel="stylesheet" href="/css/style.css">
+
+    </head>
+    <body>
+        
+        <div class="header-cont">
+            <span class="header-last-result">
+                <table cellpadding="0" cellspacing="5">
+                    <tr>
+                        <td>
+                            <div class="latest-guage-speed" id="latest-gauge-https"></div>
+                            <div class="latest-guage-speed" id="latest-gauge-bittorrent"></div>
+                            <div class="latest-guage-speed-small" id="latest-gauge-vpn-connect"></div>
+                            <div class="latest-guage-speed-small" id="latest-gauge-dns-lookup"></div>
+                        </td>
+                        <td>
+                            <span id="latest-location"></span>
+                        </td>
+                        <td>
+                            <span id="latest-vpn-service"></span>
+                        </td>
+                        <td>
+                            Start: <span id="latest-timestamp-iso"></span><br>
+                            End: <span id="latest-timestamp-end-iso"></span>
+                        </td>
+                        <td>
+                            <a class="speedtest" id="log-results" target="_blank">results log</a><br>
+                            <a class="speedtest" id="log-speedtest" target="_blank">speedtest log</a><br>
+                            <a class="speedtest" id="log-openvpn" target="_blank">openvpn log</a><br>
+                            <a class="speedtest" id="log-bittorrent" target="_blank">bittorrent log</a>
+                        </td>
+                        <td>
+                            test result:<br><span id="latest-test-result"></span>
+                        </td>
+                    </tr>
+                </table>
+            </span>
+            <span class="header-menu">
+                <div class="dropdown">
+                  <button class="dropbtn">Menu</button>
+                  <div class="dropdown-content">
+                    <a href="index.html">Home</a>  
+                    <a href="about.html">Why? How? What?</a>
+                    <a href="verify.html">Verify Our Tests</a>
+                    <a href="https://github.com/vpnspeedtest/speedtests-scripts" target="_blank">View the Source Code</a>
+                  </div>
+                </div>
+            </span>
+        </div>
+        
+        <div class="container"><h2><span id="speedtest_counter">0</span> VPN speed tests.</h2></div>
+        
+        <div class="center">
+            <!-- Trigger/Open The Modal -->
+            <span id="location"  style="visibility:hidden" value="Amsterdam"></span>
+            <span class="styled-select">
+                <select id="vpns" onchange="updateGuages(this.value)">
+                    <option value="">- choose a vpn -</option>
+                    <option value="acevpn">Acevpn</option>
+                    <option value="blackvpn">BlackVPN</option>
+                    <option value="bufferedvpn">Buffered VPN</option>
+                    <option value="cyberghost">CyberGhost</option>
+                    <option value="expressvpn">ExpressVPN</option>
+                    <option value="frootvpn">FrootVPN</option>
+                    <option value="hidemyass">HideMyAss!</option>
+                    <option value="ipvanish">IPVanish</option>
+                    <option value="privateinternetaccess">Private Internet Access</option>
+                    <option value="privatoria">Privatoria</option>
+                    <option value="purevpn">PureVPN</option>
+                    <option value="ra4wvpn">RA4WVPN</option>
+                    <option value="slickvpn">SlickVPN</option>
+                    <option value="torguard">TorGuard</option>
+                    <option value="tunnelbear">Tunnelbear</option>
+                    <option value="vikingvpn">VikingVPN</option>
+                    <option value="vpnbook">VPNBook</option>
+                    <option value="vpnghost">VPNGhost</option>
+                    <option value="vpnsh">VPN.sh</option>
+                    <option value="vpnunlimited">VPN Unlimited</option>
+                    <option value="vyprvpn">VyprVPN</option>
+                    <option value="worldvpn">WorldVPN</option>
+                </select>
+            </span>
+            <span id="privacy-test" class="privacytest" onclick="showPrivacyModal()" style="visibility:hidden"><a href="#">VPN<br>Privacy<br>Test?</a><span>
+        </div>
+        <table class="center">
+            <tr>
+                <td colspan='3'><span id="speedtest-num-results">&nbsp;<br>&nbsp;</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="guage-speed" id="gauge-https-overview"></div><br>
+                    <div class="guage-speed" id="gauge-bittorrent-overview"></div><br>
+                    <div class="guage-speed-small" id="gauge-vpn-connect"></div>
+                    <div class="guage-speed-small" id="gauge-dns-lookup"></div>
+                </td>
+                <td width='40'>
+                </td>
+                <td>
+                    <table>
+                        <tr>
+                            <td onclick="showModal('Los Angeles');"><img src="/img/usa.png"><br>Los Angeles</td>
+                            <td onclick="showModal('Los Angeles');">
+                                <div class="guage-speed-small" id="gauge-https-losangeles"></div>
+                                <div class="guage-speed-small" id="gauge-bittorrent-losangeles"></div>
+                            </td>
+                            <td width='20'></td>
+                            <td onclick="showModal('New Jersey');"><img src="/img/usa.png"><br>New York</td>
+                            <td onclick="showModal('New Jersey');">
+                                <div class="guage-speed-small" id="gauge-https-newjersey"></div>
+                                <div class="guage-speed-small" id="gauge-bittorrent-newjersey"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td onclick="showModal('London');"><img src="/img/london.png"><br>London</td>
+                            <td onclick="showModal('London');">
+                                <div class="guage-speed-small" id="gauge-https-london"></div>
+                                <div class="guage-speed-small" id="gauge-bittorrent-london"></div>
+                            </td>
+                            <td width='20'></td>
+                            <td onclick="showModal('Paris');"><img src="/img/paris.png"><br>Paris</td>
+                            <td onclick="showModal('Paris');">
+                                <div class="guage-speed-small" id="gauge-https-paris"></div>
+                                <div class="guage-speed-small" id="gauge-bittorrent-paris"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td onclick="showModal('Amsterdam');"><img src="/img/amsterdam.png"><br>Amsterdam</td>
+                            <td onclick="showModal('Amsterdam');">
+                                <div class="guage-speed-small" id="gauge-https-amsterdam"></div>
+                                <div class="guage-speed-small" id="gauge-bittorrent-amsterdam"></div>
+                            </td>
+                            <td width='20'></td>
+                            <td onclick="showModal('Frankfurt');"><img src="/img/frankfurt.png"><br>Frankfurt</td>
+                            <td onclick="showModal('Frankfurt');">
+                                <div class="guage-speed-small" id="gauge-https-frankfurt"></div>
+                                <div class="guage-speed-small" id="gauge-bittorrent-frankfurt"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td onclick="showModal('Sydney');"><img src="/img/sydney.png"><br>Sydney</td>
+                            <td onclick="showModal('Sydney');">
+                                <div class="guage-speed-small" id="gauge-https-sydney"></div>
+                                <div class="guage-speed-small" id="gauge-bittorrent-sydney"></div>
+                            </td>
+                            <td width='20'></td>
+                            <td onclick="showModal('Tokyo');"><img src="/img/tokyo.png"><br>Tokyo</td>
+                            <td onclick="showModal('Tokyo');">
+                                <div class="guage-speed-small" id="gauge-https-tokyo"></div>
+                                <div class="guage-speed-small" id="gauge-bittorrent-tokyo"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        
+        <br><br><br><br><br><br><br>
+        
+        <div class="footer center">hello. contact vpnspeedtest [at] protonmail.com</div>
+        <br>
+        <div class="footer center">VPNSpeedTest.org is licensed under a Creative Commons<br>Attribution-NonCommercial-ShareAlike 4.0 International License.</div>
+        
+      <!-- The Modal -->
+      <div id="myModal" class="modal">
+          <!-- Modal content -->
+          <div class="modal-content">
+                <div class="modal-header">
+                  <span class="close" id="close-graph">x</span>
+                  <img src='/img/usa.png' onclick="updateGraph('Los Angeles')">
+                  <img src='/img/usa.png' onclick="updateGraph('New Jersey')">
+                  <img src='/img/london.png' onclick="updateGraph('London')">
+                  <img src='/img/paris.png' onclick="updateGraph('Paris')">
+                  <img src='/img/amsterdam.png' onclick="updateGraph('Amsterdam')">
+                  <img src='/img/frankfurt.png' onclick="updateGraph('Frankfurt')">
+                  <img src='/img/sydney.png' onclick="updateGraph('Sydney')">
+                  <img src='/img/tokyo.png' onclick="updateGraph('Tokyo')">
+                </div>
+                <div class="modal-body">
+                  <canvas id="canvas"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <span class="text-transform: uppercase;" id="speedtest-vpn-name"></span> - <span id="speedtest-location"></span> - <span id="speedtest-count"></span>
+                    <div id='speedtest-logs'></div>
+                    <div id='speedtest-data' style="visibility: hidden"></div>
+                </div>
+          </div>
+      </div>
+      
+      <!-- Prvacy Modal -->
+      <div id="PrivacyModal" class="modal">
+          <!-- Modal content -->
+          <div class="modal-content">
+                <div class="modal-header">
+                  <span class="close" id="close_privacy">x</span>
+                  <select id="privacy-select" onchange="socket.emit('privacy-vpn', this.value);"></select>
+                </div>
+                <div class="modal-body">
+                   <table class="center">
+                        <tr><td class='DescriptionCell'></td><td><img id='privacy-Logo' src='#' height='100' width='100'></td></tr>
+                        <tr><td class='DescriptionCell'>VPN Service</td><td><span id='privacy-VpnName'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Based In (Country)</td><td><span id='privacy-Country'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Fourteen Eyes?</td><td><span id='privacy-FourteenEyes'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Enemy of the Internet</td><td><span id='privacy-EnemyoftheInternet'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Logs Traffic</td><td><span id='privacy-LogsTraffic'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Logs IP Address</td><td><span id='privacy-LogsIPAddress'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Logs Timestamps</td><td><span id='privacy-LogsTimestamps'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Logs DNS Requests</td><td><span id='privacy-LogsDNS'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Logs Bandwidth</td><td><span id='privacy-LogsBandwidth'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Anonymous Payment Method</td><td><span id='privacy-AnonymousPaymentMethod'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Accepts Bitcoin</td><td><span id='privacy-AcceptsBitcoin'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Meets PrivacyTools IO Criteria</td><td><span id='privacy-MeetsPrivacyToolsIOCriteria'></span></td></tr>
+                        <tr><td class='DescriptionCell'>1st Party DNS Servers</td><td><span id='privacy-1stPartyDNSServers'></span></td></tr>
+                        <tr><td class='DescriptionCell'>IPv6 Blocked</td><td><span id='privacy-IPv6Blocked'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Blocks SMTP</td><td><span id='privacy-AuthSMTP'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Blocks P2P</td><td><span id='privacy-P2P'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Dedicated or Virtual Servers</td><td><span id='privacy-DedicatedorVirtual'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Default Data Encryption</td><td><span id='privacy-DefaultDataEncryption'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Handshake Encryption</td><td><span id='privacy-HandshakeEncryption'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Offers OpenVPN</td><td><span id='privacy-OffersOpenVPN'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Linux (Manual Config)</td><td><span id='privacy-Linux'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Supports Multihop</td><td><span id='privacy-SupportsMultihop'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Supports TCP Port 443<td><span id='privacy-SupportsTCPPort443'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Supports Obfsproxy</td><td><span id='privacy-Obfsproxy'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Supports SOCKS</td><td><span id='privacy-SOCKS'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Supports SSL Tunnel</td><td><span id='privacy-SSLTunnel'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Supports SSH Tunnel</td><td><span id='privacy-SSHTunnel'></span></td></tr>
+                        <tr><td class='DescriptionCell'>Other Proprietary Protocols</td><td><span id='privacy-ProprietaryProtocols'></span></td></tr>
+                   </table>
+                </div>
+                <div class="modal-footer">
+                    Data from <a href="https://thatoneprivacysite.net/" target="_blank">thatoneprivacysite.net</a> licensed under a Creative Commons<br>Attribution-NonCommercial-ShareAlike 4.0 International License.
+                </div>
+          </div>
+      </div>
+      
+    <script>
+        
+        var socket = io('http://vpnspeedtest.org');
+        socket.emit('counter', 'hello');
+        
+        
+        
+        // Get the modal
+        var modal = document.getElementById('myModal');
+        var modalprivacy = document.getElementById('PrivacyModal');
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementById("close-graph");
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+            modalprivacy.style.display = "none";
+            if (window.myLine != undefined) {
+                window.myLine.destroy();
+            }
+        }
+        
+        // When the user clicks on <span> (x), close the modal
+        var span_privacy =  document.getElementById("close_privacy");
+        span_privacy.onclick = function() {
+            modalprivacy.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal || event.target == modalprivacy) {
+                modal.style.display = "none";
+                modalprivacy.style.display = "none";
+            }
+        }
+        
+        function showModal(location) {
+            modal.style.display = "block";
+            updateGraph(location);
+        }
+
+        function showPrivacyModal() {            
+            var vpn = document.getElementById('vpns').value;
+            socket.emit('privacy-vpn', vpn);
+            
+            var priv_select_value = document.getElementById('privacy-select').value;
+            console.log("privacy-select value is:", priv_select_value);
+            if (priv_select_value == undefined || priv_select_value == '') {
+                socket.emit('privacy-vpnlist');
+            }
+            
+            document.getElementById('privacy-select').value = vpn;
+            
+            modalprivacy.style.display = "block";
+        }
+    
+        function updateGuages(vpn){
+            socket.emit('gauges-overview', vpn);
+            socket.emit('gauges-detailed', vpn);
+            
+            
+            if (vpn != undefined && vpn != '') {
+                document.getElementById('privacy-test').style.visibility='visible';
+            }
+            else {
+                document.getElementById('privacy-test').style.visibility='hidden';
+            }
+        }
+        
+        function updateGraph(location){
+            var myvpn = document.getElementById('vpns').value;
+            document.getElementById('location').value = location;
+            
+            var myLocation = location.toLowerCase().replace(" ", "");
+            console.log(myvpn, myLocation);
+            socket.emit('graph', {vpn: myvpn, location: myLocation});
+            
+            document.getElementById('speedtest-vpn-name').innerHTML = myvpn;
+            document.getElementById('speedtest-location').innerHTML = location.replace("Jersey", "York");
+            document.getElementById('speedtest-logs').innerHTML = "Click any point on the graph for more speedtest data."
+        }
+
+       document.getElementById("canvas").onclick = function(evt) {
+            var activePoints = window.myLine.getElementsAtEvent(evt);                  
+            var firstPoint = activePoints[0];
+            console.log(firstPoint);
+            if (firstPoint !== undefined){
+                speedtest_data = document.getElementById("speedtest-data").value;
+                console.log("data:", speedtest_data);
+                if (speedtest_data != undefined) {
+                    var speedtest_json = speedtest_data[parseInt(firstPoint._index)].results;
+                    //document.getElementById("speedtest-logs").innerHTML = speedtest_json;
+                    socket.emit('result', speedtest_json);
+                }
+            }
+         };
+
+        var myColors = [
+        "#ff0000",
+        "#f9c802",
+        "#a9d70b"
+        ];
+        
+        var guage_latest_https = new JustGage({
+            id: "latest-gauge-https",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_latest_bittorrent = new JustGage({
+            id: "latest-gauge-bittorrent",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_latest_vpn_connect = new JustGage({
+            id: "latest-gauge-vpn-connect",
+            value: 0,
+            min: 0,
+            max: 10,
+            title: "connect",
+            label: "seconds",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_latest_dns_lookup = new JustGage({
+            id: "latest-gauge-dns-lookup",
+            value: 0,
+            min: 0,
+            max: 3,
+            title: "DNS",
+            label: "seconds",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+      
+        var guage_https_overview = new JustGage({
+            id: "gauge-https-overview",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: false,
+            shadowOpacity: 0.7,
+            shadowSize: 3,
+            shadowVerticalOffset: 3
+        });
+        var guage_bittorrent_overview = new JustGage({
+            id: "gauge-bittorrent-overview",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: false,
+            shadowOpacity: 0.7,
+            shadowSize: 3,
+            shadowVerticalOffset: 3
+        });
+        var guage_vpn_connect = new JustGage({
+            id: "gauge-vpn-connect",
+            value: 0,
+            min: 0,
+            max: 10,
+            title: "VPN Connect",
+            label: "seconds",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: false,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_dns_lookup = new JustGage({
+            id: "gauge-dns-lookup",
+            value: 0,
+            min: 0,
+            max: 3,
+            title: "DNS",
+            label: "seconds",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: false,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_https_losangeles = new JustGage({
+            id: "gauge-https-losangeles",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_https_newjersey = new JustGage({
+            id: "gauge-https-newjersey",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_https_london = new JustGage({
+            id: "gauge-https-london",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_https_amsterdam = new JustGage({
+            id: "gauge-https-amsterdam",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_https_paris = new JustGage({
+            id: "gauge-https-paris",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_https_frankfurt = new JustGage({
+            id: "gauge-https-frankfurt",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_https_tokyo = new JustGage({
+            id: "gauge-https-tokyo",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_https_sydney = new JustGage({
+            id: "gauge-https-sydney",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "https",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_bittorrent_losangeles = new JustGage({
+            id: "gauge-bittorrent-losangeles",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_bittorrent_newjersey = new JustGage({
+            id: "gauge-bittorrent-newjersey",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_bittorrent_london = new JustGage({
+            id: "gauge-bittorrent-london",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_bittorrent_amsterdam = new JustGage({
+            id: "gauge-bittorrent-amsterdam",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_bittorrent_paris = new JustGage({
+            id: "gauge-bittorrent-paris",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_bittorrent_frankfurt = new JustGage({
+            id: "gauge-bittorrent-frankfurt",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_bittorrent_tokyo = new JustGage({
+            id: "gauge-bittorrent-tokyo",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        var guage_bittorrent_sydney = new JustGage({
+            id: "gauge-bittorrent-sydney",
+            value: 0,
+            min: 0,
+            max: 100,
+            levelColors : myColors,
+            title: "bittorrent",
+            label: "Mbps",
+            levelColorsGradient: false,
+            showMinMax: true,
+            showInnerShadow: true,
+            shadowOpacity: 0.7,
+            shadowSize: 1,
+            shadowVerticalOffset: 1
+        });
+        
+            
+
+        socket.on('result', function(data){
+            console.log(data);
+            
+            try {
+                var speedtest_data = JSON.parse(data);
+                
+                var config_file = speedtest_data['vpn-config-file'];
+                var config_file_path = config_file.split('/');
+                
+                var show_me = "&nbsp;OpenVPN file: " + config_file_path[config_file_path.length-1] + "\<br>";
+                if (speedtest_data['vpn-connection-time'] != undefined){
+                    show_me += "&nbsp;VPN conntected in " + String(Number(speedtest_data['vpn-connection-time']).toFixed(2)) + " seconds";
+                }
+                if (speedtest_data['dns-lookup-time'] != undefined){
+                    show_me += "&nbsp;-&nbsp;Average DNS time: " + String(Number(speedtest_data['dns-lookup-time']).toFixed(2)) + " seconds";
+                }
+                show_me += "\<br>"
+                show_me += "&nbsp;\<a target='_blank' href=\'" + speedtest_data['https-url'] + "\'>HTTPS file\</a>";
+                show_me += "&nbsp;\<a target='_blank' href=\'" + speedtest_data['p2p-url'] + "\'>torrent file\</a>";
+                show_me += "&nbsp;\<a target='_blank' href=\'/logs/" + speedtest_data['log-results'] + "\'>log-results\</a>";
+                show_me += "&nbsp;\<a target='_blank' href=\'/logs/" + speedtest_data['log-openvpn'] + "\'>log-openvpn\</a>";
+                show_me += "&nbsp;\<a target='_blank' href=\'/logs/" + speedtest_data['log-speedtest'] + "\'>log-speedtest\</a>";
+                show_me += "&nbsp;\<a target='_blank' href=\'/logs/" + speedtest_data['log-bittorrent'] + "\'>log-bittorrent\</a>";
+                
+                document.getElementById("speedtest-logs").innerHTML = show_me;
+                
+            }
+            catch (err) {
+                console.log("ERROR! " + err.message);
+            }
+        });
+       
+        socket.on('graph', function(data){
+            console.log(data);
+            document.getElementById("speedtest-data").value = data;
+            var speedtest_count = Number(parseInt(data.length)*2).toString(); //one result is 1 https speedtest and 1 bittorrent speedtest
+            document.getElementById("speedtest-count").innerHTML = speedtest_count + " speed tests.";
+            
+            //var myvpn = document.getElementById('vpns').value;
+            //var mylocation = document.getElementById('locations').value;
+            //console.log(myvpn, mylocation);
+            
+            var graph_labels = [];
+            var https_data = [];
+            var p2p_data = [];
+            
+            for (len = data.length, i=0; i<len; ++i) {
+                var timestamp = data[i].time;
+                var https_speed = data[i].https_speed;
+                var p2p_speed = data[i].p2p_speed;
+                
+                var date = new Date(timestamp);
+                graph_labels[i] = date;
+                https_data[i] = { x: date, y:https_speed };
+                p2p_data[i] = { x: date, y:p2p_speed };
+            }
+            
+    		var timeFormat = 'DD/MM/YYYY HH:mm';
+		
+
+
+    		var color = Chart.helpers.color;
+    		var config = {
+    			type: 'line',
+    			data: {
+    				labels: graph_labels,
+    				datasets: [{
+    					label: "https",
+    					backgroundColor: color(window.chartColors.green).alpha(0.2).rgbString(),
+    					borderColor: window.chartColors.green,
+    					fill: true,
+    					data: https_data,
+
+    				}, {
+    					label: "bittorrent",
+    					backgroundColor: color(window.chartColors.purple).alpha(0.2).rgbString(),
+    					borderColor: window.chartColors.purple,
+    					fill: true,
+    					data: p2p_data,
+    				}]
+    			},
+    			options: {
+                    title:{
+                        display: false,
+                        //text: myvpn + ' - ' + mylocation
+                    },
+    				scales: {
+                        xAxes: [{
+                        	type: "time",
+                        	display: true,
+                        	time: {
+                        		format: timeFormat
+                        	}
+                        }],
+    					yAxes: [{
+    						scaleLabel: {
+    							display: true,
+    							labelString: 'Mbps'
+    						},
+                            ticks: {
+                                  min: 0,
+                                  max: 250,
+                                stepWidth: 50
+                                }
+    				        }],
+                        }
+    			}
+    		};
+            
+            Chart.defaults.global.hover.mode = 'single';
+			var ctx = document.getElementById("canvas").getContext("2d");
+            if (window.myLine != undefined) {
+                window.myLine.destroy();
+            }
+			window.myLine = new Chart(ctx, config);
+        });
+        
+        socket.on('counter', function(data){
+            console.log('counter', data);
+        
+            var counter_options = {
+                useEasing: true, 
+                useGrouping: false, 
+                separator: '', 
+                decimal: '.', 
+                prefix: '', 
+                suffix: '' 
+            };
+            var counter = new CountUp("speedtest_counter", 0, parseInt(data), 0, 2.5, counter_options);
+            counter.start();
+        });
+        
+        socket.on('gauges-overview', function(data){
+            console.log('gauges-overview', data);
+            guage_https_overview.refresh(data.avg_https);
+            guage_bittorrent_overview.refresh(data.avg_p2p);
+            guage_vpn_connect.refresh(data.avg_conn);
+            guage_dns_lookup.refresh(data.avg_dns);
+            document.getElementById('speedtest-num-results').innerHTML = data.num_results + " speed tests.<br>Click on the flags for more detailed graphs."
+        });
+        
+        socket.on('gauges-detailed', function(data){
+            console.log('gauges-detailed', data);
+            if (typeof data.london != 'undefined') {
+                guage_https_london.refresh(data.london.https);
+                guage_bittorrent_london.refresh(data.london.p2p);
+            }
+            else {
+                guage_https_london.refresh(0);
+                guage_bittorrent_london.refresh(0);
+            }
+            if (typeof data.amsterdam != 'undefined') {
+                guage_https_amsterdam.refresh(data.amsterdam.https);
+                guage_bittorrent_amsterdam.refresh(data.amsterdam.p2p);
+            }
+            else {
+                guage_https_amsterdam.refresh(0);
+                guage_bittorrent_amsterdam.refresh(0);
+            }
+            
+            if (typeof data.paris != 'undefined') {
+                guage_https_paris.refresh(data.paris.https);
+                guage_bittorrent_paris.refresh(data.paris.p2p);
+            }
+            else {
+                guage_https_paris.refresh(0);
+                guage_bittorrent_paris.refresh(0);
+            }
+            if (typeof data.frankfurt != 'undefined') {
+                guage_https_frankfurt.refresh(data.frankfurt.https);
+                guage_bittorrent_frankfurt.refresh(data.frankfurt.p2p);
+            }
+            else {
+                guage_https_frankfurt.refresh(0);
+                guage_bittorrent_frankfurt.refresh(0);
+            }
+            
+            if (typeof data.losangeles != 'undefined') {
+                guage_https_losangeles.refresh(data.losangeles.https);
+                guage_bittorrent_losangeles.refresh(data.losangeles.p2p);
+            }
+            else {
+                guage_https_losangeles.refresh(0);
+                guage_bittorrent_losangeles.refresh(0);
+            }
+            
+            if (typeof data.newjersey != 'undefined') {
+                guage_https_newjersey.refresh(data.newjersey.https);
+                guage_bittorrent_newjersey.refresh(data.newjersey.p2p);
+            }
+            else {
+                guage_https_newjersey.refresh(0);
+                guage_bittorrent_newjersey.refresh(0);
+            }
+            
+            if (typeof data.tokyo != 'undefined') {
+                guage_https_tokyo.refresh(data.tokyo.https);
+                guage_bittorrent_tokyo.refresh(data.tokyo.p2p);
+            }
+            else {
+                guage_https_tokyo.refresh(0);
+                guage_bittorrent_tokyo.refresh(0);
+            }
+            
+            if (typeof data.sydney != 'undefined') {
+                guage_https_sydney.refresh(data.sydney.https);
+                guage_bittorrent_sydney.refresh(data.sydney.p2p);
+            }
+            else {
+                guage_https_sydney.refresh(0);
+                guage_bittorrent_sydney.refresh(0);
+            }
+        });
+        
+        socket.on('newspeedtest', function(data){
+            console.log(data.message);
+            if (typeof data.message == 'undefined' || 'none' == data.message) {
+                return;
+            }
+            
+            test_result = JSON.parse(data.message);
+            
+            //update the pretty counter
+            var current_count = parseInt(document.getElementById("speedtest_counter").innerHTML);
+            if (current_count != 0 && test_result["test-result"] == 'OK') {
+                document.getElementById("speedtest_counter").innerHTML = current_count + 2;
+                console.log("Increased the counter.");
+            }
+                        
+            var location_img = test_result["location"].toLowerCase();
+            location_img = location_img.replace(" ", "")
+            document.getElementById('latest-location').innerHTML = "\<img src='/img/" + location_img + ".png' title='" + test_result["location"] + "' height='48' width='48'/>";
+            
+            var vpn_img = test_result["vpn-service"];
+            document.getElementById('latest-vpn-service').innerHTML = "\<img src='/img/" + vpn_img + ".png' title='" + test_result["vpn-service"] + "' height='36' width='36'/>";
+            
+            var date_start = new Date(test_result["timestamp-iso"]);
+            document.getElementById('latest-timestamp-iso').innerHTML = moment(date_start).format("h:mm:ss a");
+            
+            var date_start = new Date(test_result["timestamp-end-iso"]);
+            document.getElementById('latest-timestamp-end-iso').innerHTML = moment(date_start).format("h:mm:ss a");
+
+            $('#log-results').attr('href','/logs/' + test_result["log-results"]);
+            $('#log-speedtest').attr('href','/logs/' + test_result["log-speedtest"]);
+            $('#log-openvpn').attr('href','/logs/' + test_result["log-openvpn"]);
+            $('#log-bittorrent').attr('href','/logs/' + test_result["log-bittorrent"]);
+
+
+            document.getElementById('latest-test-result').innerHTML = test_result['test-result'];
+            if (test_result['test-result'] == 'OK') {
+                document.getElementById('latest-test-result').className = 'success';
+            }
+            else {
+                document.getElementById('latest-test-result').className = 'failure';
+            }
+
+            if ('https-download-speed-Mbps' in test_result) {
+                guage_latest_https.refresh(parseFloat(test_result["https-download-speed-Mbps"]));
+            }
+            else {
+                guage_latest_https.refresh(0);
+            }
+            if ('p2p-download-speed-Mbps' in test_result) {
+                guage_latest_bittorrent.refresh(test_result["p2p-download-speed-Mbps"]);
+            }
+            else {
+                guage_latest_bittorrent.refresh(0);
+            }
+            if ('vpn-connection-time' in test_result) {
+                guage_latest_vpn_connect.refresh(test_result["vpn-connection-time"]);
+            }
+            else {
+                guage_latest_vpn_connect.refresh(0);
+            }
+            if ('dns-lookup-time' in test_result) {
+                guage_latest_vpn_connect.refresh(test_result["dns-lookup-time"]);
+            }
+            else {
+                guage_latest_vpn_connect.refresh(0);
+            }
+        });
+        
+        function updatePrivacyElement(element_id, privacy_info_key, data) {
+            
+            var cell_data = data[privacy_info_key];
+            document.getElementById(element_id).innerHTML = cell_data;
+            
+            var cell_css_class = "DataCell"; //resets the previous formatting
+            var nice_label = privacy_info_key.replace(/[^\w]/gi, '');
+            var css_class_to_add = findCssFormatting(nice_label.toLowerCase(), cell_data);
+            if (css_class_to_add != "") {
+                cell_css_class += css_class_to_add;
+            }
+            
+            document.getElementById(element_id).parentNode.className = cell_css_class;
+            console.log("Adding CSS class: " + cell_css_class)
+            
+        }
+        
+        socket.on('privacy-vpn', function(data){
+            console.log('privacy-vpn', data);
+            
+            updatePrivacyElement('privacy-VpnName', 'VPN Service', data);
+            updatePrivacyElement('privacy-Country', 'Based in (Country)', data);
+            updatePrivacyElement('privacy-FourteenEyes', 'Fourteen Eyes Country', data);
+            updatePrivacyElement('privacy-EnemyoftheInternet', 'Enemy of the Internet', data);
+            updatePrivacyElement('privacy-LogsTraffic', 'Traffic', data);
+            updatePrivacyElement('privacy-LogsIPAddress', 'IP Address', data);
+            updatePrivacyElement('privacy-LogsTimestamps', 'Timestamps', data);
+            updatePrivacyElement('privacy-LogsDNS', 'DNS Requests', data);
+            updatePrivacyElement('privacy-LogsBandwidth', 'Bandwidth', data);
+            updatePrivacyElement('privacy-AnonymousPaymentMethod', 'Anonymous Payment Method', data);
+            updatePrivacyElement('privacy-AcceptsBitcoin', 'Accepts Bitcoin', data);
+            updatePrivacyElement('privacy-MeetsPrivacyToolsIOCriteria', 'Meets PrivacyToolsIO Criteria', data);
+            updatePrivacyElement('privacy-1stPartyDNSServers', '1st Party DNS Servers', data);
+            updatePrivacyElement('privacy-IPv6Blocked', 'IPv6 Supported / Blocked', data);
+            updatePrivacyElement('privacy-AuthSMTP', 'Blocks SMTP (Authent.)', data);
+            updatePrivacyElement('privacy-P2P', 'Blocks P2P', data);
+            updatePrivacyElement('privacy-DedicatedorVirtual', 'Dedicated or Virtual', data);
+            updatePrivacyElement('privacy-DefaultDataEncryption', 'Default Provided', data);
+            updatePrivacyElement('privacy-HandshakeEncryption', 'Strongest Provided', data);
+            updatePrivacyElement('privacy-OffersOpenVPN', 'Offers OpenVPN', data);
+            updatePrivacyElement('privacy-Linux', 'Linux Support (Manual)', data);
+            updatePrivacyElement('privacy-SupportsMultihop', 'Supports Multihop', data);
+            updatePrivacyElement('privacy-SupportsTCPPort443', 'Supports TCP Port 443', data);
+            updatePrivacyElement('privacy-Obfsproxy', 'Supports Obfsproxy', data);
+            updatePrivacyElement('privacy-SOCKS', 'Supports SOCKS', data);
+            updatePrivacyElement('privacy-SSLTunnel', 'Supports SSL Tunnel', data);
+            updatePrivacyElement('privacy-SSHTunnel', 'Supports SSH Tunnel', data);
+            updatePrivacyElement('privacy-ProprietaryProtocols', 'Other Proprietary Protocols', data);
+            
+            var logo = data['VPN Service'];
+            logo = logo.replace(/^\s+|\s+$/g, '');
+            logo = logo.replace(/\W/g, '')
+            document.getElementById('privacy-Logo').src = "/logos/" + logo + ".jpg";
+            //document.getElementById('privacy-select').value = document.getElementById('vpns').value;
+
+        });
+        
+        socket.on('privacy-vpnlist', function(data){
+            console.log('privacy-vpnlist', data);
+            select = document.getElementById('privacy-select')
+            
+            for (len = data.length, i=0; i<len; ++i) {
+                
+                var opt = document.createElement('option');
+                    opt.value = data[i];
+                    opt.innerHTML = data[i];
+                    select.appendChild(opt);
+            }
+            
+            select.value = document.getElementById('vpns').value;
+        });
+        
+        function findCssFormatting(criteria_nice_name, cell_data) {
+            
+            if (criteria_nice_name == '1stpartydnsservers'){
+                criteria_nice_name = 'dnsservers';
+            }
+            
+            
+            console.log("Looking for formatting for: " + criteria_nice_name);
+
+            var css_classes_to_add = "";
+        
+            if (criteria_nice_name in criteria_format_rules) {
+                var rules = criteria_format_rules[criteria_nice_name];
+                if ("importance" in rules) {
+                    if ("more" == rules["importance"]) {
+                        css_classes_to_add += " Importance-More";
+                    }
+                    else if ("less" == rules["importance"]) {
+                        css_classes_to_add += " Importance-Less";
+                    }
+                }
+                if ("danger" in rules) {
+                    if (isRuleRelevant(rules["danger"], cell_data)) {
+                        css_classes_to_add += " Danger";
+                        return css_classes_to_add;  //return so we stop checking on safe/warning/danger
+                    }
+                }
+                if ("warning" in rules) {
+                    if (isRuleRelevant(rules["warning"], cell_data)) {
+                        css_classes_to_add += " Warning";
+                        return css_classes_to_add;  //return so we stop checking on safe/warning/danger
+                    }
+                }
+                if ("safe" in rules) {
+                    if (isRuleRelevant(rules["safe"], cell_data)) {
+                        css_classes_to_add += " Safe";
+                        return css_classes_to_add;  //return so we stop checking on safe/warning/danger
+                    }
+                }
+            }
+
+            return css_classes_to_add;
+        }
+        
+        function isRuleRelevant(rule, cell_data) {
+        
+            if (rule == undefined || cell_data == undefined) {
+                return false;
+            }
+            //if the rule ends in a '+' symbol then we need to convert the strings to numbers
+            if (rule.indexOf("+", rule.length - 1) != -1) {
+                console.log("Doing math mode for rule: " + rule);
+                var min_value_int = parseInt(rule);
+                var cell_data_int = parseInt(cell_data);
+                if (min_value_int != NaN && cell_data_int != NaN) {
+                    if (cell_data_int >= min_value_int) {
+                        console.log(cell_data + " is bigger or equal to " + rule);
+                        return true;
+                    }
+                }
+            }
+        
+            var match_list = rule.toLowerCase().split(",");
+            if (contains(match_list, cell_data.toLowerCase())) {
+                return true;  
+            }
+        
+            return false;
+        }
+
+        function contains(a, obj) {
+            var i = a.length;
+            while (i--) {
+               if (a[i] === obj) {
+                   return true;
+               }
+            }
+            return false;
+        }
+        
+    </script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-87832605-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+  </body>
+</html>
